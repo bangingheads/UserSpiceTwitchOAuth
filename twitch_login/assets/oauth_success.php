@@ -34,6 +34,7 @@ $accessToken = $provider->getAccessToken('authorization_code', [
 $resourceOwner = $provider->getResourceOwner($accessToken);
 $twuser = $resourceOwner->toArray();
 $twUsername = $twuser['data'][0]['login'];
+$twId = $twuser['data'][0]['id'];
 
 }catch (Exception $e) {
 	unset($_SESSION['oauth2state']);
@@ -46,7 +47,7 @@ $checkExistingQ = $db->query("SELECT * FROM users WHERE email = ?",array ($twEma
 
 $CEQCount = $checkExistingQ->count();
 }else {
-	$twEmail = "";
+	$twEmail = ""; //User does not have a verified twitch email address
 	$CEQCount = 0;
 }
 
@@ -56,7 +57,7 @@ $checkExisting = $checkExistingQ->first();
 $newLoginCount = $checkExisting->logins+1;
 $newLastLogin = date("Y-m-d H:i:s");
 
-$fields=array('tw_uid'=>$twUsername, 'logins'=>$newLoginCount, 'last_login'=>$newLastLogin);
+$fields=array('tw_uid'=>$twId, 'tw_uname'=>$twUsername, 'logins'=>$newLoginCount, 'last_login'=>$newLastLogin);
 
 $db->update('users',$checkExisting->id,$fields);
 $sessionName = Config::get('session/session_name');
@@ -95,7 +96,20 @@ Redirect::to($whereNext);
     // //No Existing UserSpice User Found
     $date = date("Y-m-d H:i:s");
 
-    $fields=array('email'=>$twEmail,'username'=>$twUsername,'permissions'=>1,'logins'=>1,'company'=>'none','join_date'=>$date,'last_login'=>$date,'email_verified'=>1,'password'=>NULL,'tw_uid'=>$twUsername);
+	$preQCount = $db->query("SELECT username FROM users WHERE username = ?",array($twUsername))->count();
+	if($preQCount == 0) {
+		$username = $twUsername;
+	}else {
+		for($i=0;$i<999;$i++) {
+			$preQCount = $db->query("SELECT username FROM users WHERE username = ?",array($twUsername.$i))->count();
+			if($preQCount == 0) {
+				$username = $twUsername.$i;
+				break;
+			}
+		}
+	}
+	
+    $fields=array('email'=>$twEmail,'username'=>$username,'permissions'=>1,'logins'=>1,'company'=>'none','join_date'=>$date,'last_login'=>$date,'email_verified'=>1,'password'=>NULL,'tw_uid'=>$twId,'tw_uname'=>$twUsername);
 
     $db->insert('users',$fields);
     $lastID = $db->lastId();

@@ -21,6 +21,7 @@ if($check > 0){
 	$db->query("ALTER TABLE settings ADD twcallback varchar(255)");
 	$db->query("ALTER TABLE settings ADD twredirect varchar(255)");
 	$db->query("ALTER TABLE users ADD tw_uid varchar(255)");
+	$db->query("ALTER TABLE users ADD tw_uname varchar(255)");
 	
 	$full_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 	$path = explode("users/", $full_url);
