@@ -34,15 +34,21 @@ $accessToken = $provider->getAccessToken('authorization_code', [
 $resourceOwner = $provider->getResourceOwner($accessToken);
 $twuser = $resourceOwner->toArray();
 $twUsername = $twuser['data'][0]['login'];
-$twEmail = $twuser['data'][0]['email'];
+
 }catch (Exception $e) {
 	unset($_SESSION['oauth2state']);
 	exit($e->getMessage());
 }
 
+if($twuser['data'][0]['email'] !== NULL) {
+$twEmail = $twuser['data'][0]['email'];
 $checkExistingQ = $db->query("SELECT * FROM users WHERE email = ?",array ($twEmail));
 
 $CEQCount = $checkExistingQ->count();
+}else {
+	$twEmail = "";
+	$CEQCount = 0;
+}
 
 //Existing UserSpice User Found
 if ($CEQCount>0){
@@ -68,17 +74,18 @@ if($twoQ->count()>0) {
   $c = $q->count();
   if($c < 1){
     $db->insert('us_ip_list', array(
-      'user_id' => $feusr->id,
+      'user_id' => $checkExisting->id,
       'ip' => $ip,
     ));
   }else{
     $f = $q->first();
     $db->update('us_ip_list',$f->id, array(
-      'user_id' => $feusr->id,
+      'user_id' => $checkExisting->id,
       'ip' => $ip,
     ));
   }
-Redirect::to($us_url_root.'users/account.php');
+
+Redirect::to($whereNext);
 }else{
   if($settings->registration==0) {
     session_destroy();
@@ -86,8 +93,6 @@ Redirect::to($us_url_root.'users/account.php');
     die();
   } else {
     // //No Existing UserSpice User Found
-    // if ($CEQCount<0){
-    //$fbpassword = password_hash(Token::generate(),PASSWORD_BCRYPT,array('cost' => 12));
     $date = date("Y-m-d H:i:s");
 
     $fields=array('email'=>$twEmail,'username'=>$twUsername,'permissions'=>1,'logins'=>1,'company'=>'none','join_date'=>$date,'last_login'=>$date,'email_verified'=>1,'password'=>NULL,'tw_uid'=>$twUsername);
@@ -100,7 +105,8 @@ Redirect::to($us_url_root.'users/account.php');
     $theNewId=$lastID;
     include($abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php');
 
-    $_SESSION["user"] = $lastID;
+	$sessionName = Config::get('session/session_name');
+	Session::put($sessionName, $lastID);
     Redirect::to($whereNext);
   }
 }
