@@ -9,6 +9,7 @@ include "plugin_info.php";
 
 //all actions should be performed here.
 //you will probably be doing more than removing the item from the db
+$db->update('settings',1,["twlogin"=>0]);
 
 $db->query("DELETE FROM us_plugins WHERE plugin = ?",array($plugin_name));
 deRegisterHooks($plugin_name);
