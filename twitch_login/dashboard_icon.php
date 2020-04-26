@@ -6,6 +6,6 @@
 ?>
 <a href="<?=$us_url_root?>users/admin.php"><div class="col-md-1 col-sm-3 col-sm-6 col-centered">
   <div class="panel panel-default">
-    <i class="fa fa-qq fa-2x"></i><br>Facebook Login<br>Icon</li>
+    <i class="fa fa-qq fa-2x"></i><br>Twitch Login<br>Icon</li>
   </div>
 </div></a>
