@@ -42,7 +42,7 @@ $provider = new TwitchProvider([
 ]);
 
 $loginUrl = $provider->getAuthorizationUrl();
-$_SESSION['oauth2state'] = $provider->getState();
+$_SESSION['twitchstate'] = $provider->getState();
 
 ?>
 <a href="<?=htmlspecialchars($loginUrl)?>">

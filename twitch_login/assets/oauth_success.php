@@ -21,9 +21,9 @@ $provider = new TwitchProvider([
     'scopes'                  => ['user:read:email']  // The scopes you would like to request
 ]);
 
-if (empty(Input::get('state')) || (isset($_SESSION['oauth2state']) && Input::get('state') !== $_SESSION['oauth2state'])) {
-    if (isset($_SESSION['oauth2state'])) {
-        unset($_SESSION['oauth2state']);
+if (empty(Input::get('state')) || (isset($_SESSION['twitchstate']) && Input::get('state') !== $_SESSION['twitchstate'])) {
+    if (isset($_SESSION['twitchstate'])) {
+        unset($_SESSION['twitchstate']);
     }
     exit('Invalid state');
 }
@@ -37,7 +37,7 @@ $twUsername = $twuser['data'][0]['login'];
 $twId = $twuser['data'][0]['id'];
 
 }catch (Exception $e) {
-	unset($_SESSION['oauth2state']);
+	unset($_SESSION['twitchstate']);
 	exit($e->getMessage());
 }
 
