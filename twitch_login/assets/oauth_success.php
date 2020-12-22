@@ -104,7 +104,7 @@ Redirect::to($whereNext);
 		}
 	}
 	
-    $fields=array('fname'=>$twUsername,'email'=>$twEmail,'username'=>$username,'permissions'=>1,'logins'=>1,'company'=>'none','join_date'=>$date,'last_login'=>$date,'email_verified'=>1,'password'=>NULL,'tw_uid'=>$twId,'tw_uname'=>$twUsername);
+    $fields=array('fname'=>$twUsername,'email'=>$twEmail,'username'=>$username,'permissions'=>1,'logins'=>1,'join_date'=>$date,'last_login'=>$date,'email_verified'=>1,'password'=>NULL,'tw_uid'=>$twId,'tw_uname'=>$twUsername);
 
     $db->insert('users',$fields);
     $lastID = $db->lastId();
