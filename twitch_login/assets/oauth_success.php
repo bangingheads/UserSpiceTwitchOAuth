@@ -25,7 +25,8 @@ if (empty(Input::get('state')) || (isset($_SESSION['twitchstate']) && Input::get
     if (isset($_SESSION['twitchstate'])) {
         unset($_SESSION['twitchstate']);
     }
-    exit('Invalid state');
+    Redirect::to($us_url_root);
+    die();
 }
 try {
 $accessToken = $provider->getAccessToken('authorization_code', [
@@ -38,86 +39,15 @@ $twId = $twuser['data'][0]['id'];
 
 }catch (Exception $e) {
 	unset($_SESSION['twitchstate']);
-	exit($e->getMessage());
+  Redirect::to($us_url_root);
+  die();
 }
 
-if($twuser['data'][0]['email'] !== NULL) {
-$twEmail = $twuser['data'][0]['email'];
-$checkExistingQ = $db->query("SELECT * FROM users WHERE email = ?",array ($twEmail));
 
-$CEQCount = $checkExistingQ->count();
-}else {
-	$twEmail = ""; //User does not have a verified twitch email address
-	$CEQCount = 0;
-}
+$fields = [
+  "tw_uid" => $twId,
+  "tw_uname" => $twUsername
+];
+if(!empty($twuser['data'][0]['email'])) $fields['email'] = $twuser['data'][0]['email'];
 
-//Existing UserSpice User Found
-if ($CEQCount>0){
-$checkExisting = $checkExistingQ->first();
-$newLoginCount = $checkExisting->logins+1;
-$newLastLogin = date("Y-m-d H:i:s");
-
-$fields=array('tw_uid'=>$twId, 'tw_uname'=>$twUsername, 'logins'=>$newLoginCount, 'last_login'=>$newLastLogin);
-
-$db->update('users',$checkExisting->id,$fields);
-$sessionName = Config::get('session/session_name');
-Session::put($sessionName, $checkExisting->id);
-
-$hooks = getMyHooks(['page'=>'loginSuccess']);
-includeHook($hooks,'body');
-  $ip = ipCheck();
-  $q = $db->query("SELECT id FROM us_ip_list WHERE ip = ?",array($ip));
-  $c = $q->count();
-  if($c < 1){
-    $db->insert('us_ip_list', array(
-      'user_id' => $checkExisting->id,
-      'ip' => $ip,
-    ));
-  }else{
-    $f = $q->first();
-    $db->update('us_ip_list',$f->id, array(
-      'user_id' => $checkExisting->id,
-      'ip' => $ip,
-    ));
-  }
-
-Redirect::to($whereNext);
-}else{
-  if($settings->registration==0) {
-    session_destroy();
-    Redirect::to($us_url_root.'users/join.php');
-    die();
-  } else {
-    // //No Existing UserSpice User Found
-    $date = date("Y-m-d H:i:s");
-
-	$preQCount = $db->query("SELECT username FROM users WHERE username = ?",array($twUsername))->count();
-	if($preQCount == 0) {
-		$username = $twUsername;
-	}else {
-		for($i=0;$i<999;$i++) {
-			$preQCount = $db->query("SELECT username FROM users WHERE username = ?",array($twUsername.$i))->count();
-			if($preQCount == 0) {
-				$username = $twUsername.$i;
-				break;
-			}
-		}
-	}
-	
-    $fields=array('fname'=>$twUsername,'email'=>$twEmail,'username'=>$username,'permissions'=>1,'logins'=>1,'join_date'=>$date,'last_login'=>$date,'email_verified'=>1,'password'=>NULL,'tw_uid'=>$twId,'tw_uname'=>$twUsername);
-
-    $db->insert('users',$fields);
-    $lastID = $db->lastId();
-
-    $insert2 = $db->query("INSERT INTO user_permission_matches SET user_id = $lastID, permission_id = 1");
-
-    $theNewId=$lastID;
-    include($abs_us_root.$us_url_root.'usersc/scripts/during_user_creation.php');
-
-	$sessionName = Config::get('session/session_name');
-	Session::put($sessionName, $lastID);
-    Redirect::to($whereNext);
-  }
-}
-
-?>
+socialLogin($twuser['data'][0]['email'], $twUsername, ["tw_uid"=>$twId], $fields);

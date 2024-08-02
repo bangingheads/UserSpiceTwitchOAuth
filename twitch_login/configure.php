@@ -22,9 +22,9 @@ $token = Token::generate();
 <!-- left -->
 <div class="form-group">
   <label for="glogin">Enable Twitch Login</label>
-  <span style="float:right;">
+  <span style="float:right;" class="form-check form-switch">
     <label class="switch switch-text switch-success">
-                <input id="twlogin" type="checkbox" class="switch-input toggle" data-desc="Twitch Login" <?php if($settings->twlogin==1) echo 'checked="true"'; ?>>
+                <input id="twlogin" type="checkbox" class="switch-input form-check-input toggle" data-desc="Twitch Login" <?php if($settings->twlogin==1) echo 'checked="true"'; ?>>
                 <span data-on="Yes" data-off="No" class="switch-label"></span>
                 <span class="switch-handle"></span>
               </label>
@@ -44,11 +44,6 @@ $token = Token::generate();
           <div class="form-group">
             <label for="fbcallback">Twitch Callback URL</label>
             <input type="text" class="form-control ajxtxt" data-desc="Twitch Callback URL" name="twcallback" id="twcallback" value="<?=$settings->twcallback?>">
-          </div>
-
-  		<div class="form-group">
-            <label for="finalredir">Redirect After Twitch Login</label>
-            <input type="text" class="form-control ajxtxt" data-desc="Twitch Redirect" name="finalredir" id="finalredir" value="<?=$settings->finalredir?>">
           </div>
 
   		</div>

@@ -41,9 +41,7 @@ $provider = new TwitchProvider([
     'scopes'                  => ['user:read:email']  // The scopes you would like to request
 ]);
 
-$loginUrl = $provider->getAuthorizationUrl();
+$link = $provider->getAuthorizationUrl();
 $_SESSION['twitchstate'] = $provider->getState();
 
 ?>
-<a href="<?=htmlspecialchars($loginUrl)?>">
-  <img class="img-responsive" align=right src="<?=$us_url_root?>usersc/plugins/twitch_login/assets/twitch.png" alt=""/></a>

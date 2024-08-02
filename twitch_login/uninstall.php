@@ -14,6 +14,10 @@ $db->update('settings',1,["twlogin"=>0]);
 $db->query("DELETE FROM us_plugins WHERE plugin = ?",array($plugin_name));
 deRegisterHooks($plugin_name);
 if(!$db->error()) {
+
+    $db->query("DELETE FROM plg_social_logins WHERE plugin = ?", [$plugin_name]);
+    $db->query("UPDATE settings SET twlogin = 0;");
+    
     err($plugin_name.' uninstalled');
     logger($user->data()->id,"USPlugins", $plugin_name. " uninstalled");
 } else {

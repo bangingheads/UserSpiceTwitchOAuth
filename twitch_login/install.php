@@ -8,7 +8,14 @@ if (in_array($user->data()->id, $master_account)){
 $db = DB::getInstance();
 include "plugin_info.php";
 
-
+if(!function_exists("socialLogin")) {
+	$db->update('us_plugins', ['plugin', '=', $plugin_name], ['status' => 'uninstalled']);
+	$usplugins[$plugin_name] = 2;
+	write_php_ini($usplugins, $abs_us_root . $us_url_root . 'usersc/plugins/plugins.ini.php');
+	usError("socialLogin function required please update UserSpice to at least 5.7.0.");
+	Redirect::to('admin.php?view=plugins');
+	die();
+}
 
 //all actions should be performed here.
 $check = $db->query("SELECT * FROM us_plugins WHERE plugin = ?",array($plugin_name))->count();
@@ -25,9 +32,12 @@ if($check > 0){
 	
 	$full_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 	$path = explode("users/", $full_url);
-	$url_path = $path[0] . "usersc/plugins/twitch_login/assets/oauth_success.php";
+	$url_path = $path[0] . "usersc/plugins/$plugin_name/assets/oauth_success.php";
 	
 	$db->update('settings', 1, ["twcallback"=>$url_path,"twlogin"=>0]);
+
+	$db->query("DELETE FROM plg_social_logins WHERE plugin = ?;",[$plugin_name]);
+	$db->insert("plg_social_logins", ["plugin"=>$plugin_name, "provider"=>"Twitch", "enabledsetting"=>"twlogin", "image"=>"logo.png", "link"=>"assets/twitch_oauth.php"]);
 	
  $fields = array(
 	 'plugin'=>$plugin_name,
@@ -50,8 +60,6 @@ $hooks = [];
 //Note you can include the same filename on multiple pages if that makes sense;
 //postion options are post,body,form,bottom
 //See documentation for more information
-$hooks['login.php']['bottom'] = 'hooks/loginbody.php';
-$hooks['join.php']['body'] = 'hooks/loginbody.php';
 
 registerHooks($hooks,$plugin_name);
 
